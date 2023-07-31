@@ -1,0 +1,10 @@
+api_platform:
+    title: 'API Parrainage'
+    description: 'API de parrainage'
+    version: '1.0.0'
+    swagger:
+        versions: [3]
+        api_keys:
+            JWT:
+                name: Authorization
+                type: header
