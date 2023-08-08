@@ -18,47 +18,46 @@ use Symfony\Component\Serializer\Annotation\Groups;
  * L'entité TRANSACTION qui gère toutes les transactions entre utilisateur
  */
 #[ORM\Entity(repositoryClass: TransactionRepository::class)]
-#[ApiResource(
-    formats: ['json' => ['application/json']], //Spécifie le format attendu
-    security: 'is_granted("ROLE_USER")', // Permet de gérer les roles
-    operations: [
-        new Get(),
-        new Post(),
-        new Patch(),
-        new Delete(security: 'is_granted("ROLE_ADMIN")'),
-        new GetCollection(normalizationContext: ['groups' => ['read:collection:trans']])
-    ]
-),
-ApiFilter(SearchFilter::class, properties: ['crediteur' => 'exact','debiteur' => 'exact'])]
+#[
+    ApiResource(
+        formats: ['json' => ['application/json']], //Spécifie le format attendu
+        security: 'is_granted("ROLE_USER")', // Permet de gérer les roles
+        operations: [
+            new Get(normalizationContext: ['groups' => ['read:item:trans']]),
+            new GetCollection(normalizationContext: ['groups' => ['read:collection:trans']]),
+        ]
+    ),
+    ApiFilter(SearchFilter::class, properties: ['crediteur' => 'exact', 'debiteur' => 'exact'])
+]
 class Transaction
 {
-    public function __construct() {
-        $this->createdAt = new \DateTimeImmutable();
-    }
-    
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['read:collection:trans'])]
+    #[Groups(['read:collection:trans', 'read:item:trans', 'read:collection:user', 'read:item:user'])]
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Groups(['read:collection:trans'])]
+    #[Groups(['read:collection:trans', 'read:item:trans', 'read:collection:user', 'read:item:user'])]
     private ?int $montant = null;
 
+    #[ORM\Column(length: 180)]
+    #[Groups(['read:collection:trans', 'read:item:trans', 'read:collection:user', 'read:item:user'])]
+    private ?string $emailSender = null;
+
     #[ORM\Column]
-    #[Groups(['read:collection:trans'])]
-    private ?\DateTimeImmutable $createdAt = null;
+    #[Groups(['read:collection:trans', 'read:item:trans', 'read:collection:user', 'read:item:user'])]
+    private ?\DateTimeImmutable $creadtedAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'crediteur')]
+    #[ORM\ManyToOne(inversedBy: 'creditedId')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['read:collection:trans'])]
-    private ?User $crediteur = null;
+    #[Groups(['read:collection:trans', 'read:item:trans'])]
+    private ?User $creditedId = null;
 
-    #[ORM\ManyToOne(inversedBy: 'debiteur')]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['read:collection:trans'])]
-    private ?User $debiteur = null;
+    public function __construct()
+    {
+        $this->creadtedAt = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -77,38 +76,38 @@ class Transaction
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getEmailSender(): ?string
     {
-        return $this->createdAt;
+        return $this->emailSender;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setEmailSender(string $emailSender): static
     {
-        $this->createdAt = $createdAt;
+        $this->emailSender = $emailSender;
 
         return $this;
     }
 
-    public function getCrediteur(): ?User
+    public function getCreadtedAt(): ?\DateTimeImmutable
     {
-        return $this->crediteur;
+        return $this->creadtedAt;
     }
 
-    public function setCrediteur(?User $crediteur): static
+    public function setCreadtedAt(\DateTimeImmutable $creadtedAt): static
     {
-        $this->crediteur = $crediteur;
+        $this->creadtedAt = $creadtedAt;
 
         return $this;
     }
 
-    public function getDebiteur(): ?User
+    public function getCreditedId(): ?User
     {
-        return $this->debiteur;
+        return $this->creditedId;
     }
 
-    public function setDebiteur(?User $debiteur): static
+    public function setCreditedId(?User $creditedId): static
     {
-        $this->debiteur = $debiteur;
+        $this->creditedId = $creditedId;
 
         return $this;
     }
